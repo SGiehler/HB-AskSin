@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<device version="2" rx_modes="CONFIG,WAKEUP,LAZY_CONFIG" cyclic_timeout="45000">
+  <supported_types>
+    <type name="HB-SOLAR-Sensor" id="HB-SOLAR-Sensor" updatable="true">
+      <parameter index="10.0" size="2.0" const_value="0xFD01" />
+    </type>
+  </supported_types>
+  <paramset type="MASTER" id="hm_solar_sen_dev_master">
+    <parameter id="DEVICE_LED_MODE">
+      <logical type="option">
+        <option id="OFF" />
+        <option id="ON" default="true" />
+      </logical>
+      <physical type="integer" interface="config" list="0" index="5.6" size="0.2" />
+      <conversion type="integer_integer_map">
+        <value_map device_value="0x00" parameter_value="0" />
+        <value_map device_value="0x01" parameter_value="1" />
+      </conversion>
+    </parameter>
+    <parameter id="LOW_BAT_LIMIT">
+      <logical type="float" min="6.5" max="15.0" default="6.5" unit="V" />
+      <physical type="integer" interface="config" list="0" index="18" size="1" />
+      <conversion type="float_integer_scale" factor="10" />
+    </parameter>
+    <parameter id="TRANSMIT_DEV_TRY_MAX">
+      <logical type="integer" min="1" max="10" default="6" />
+      <physical type="integer" interface="config" list="0" index="20" size="1" />
+    </parameter>
+    <parameter id="Sendeintervall">
+      <logical type="integer" min="10" max="43200" default="60" unit="s" />
+      <physical type="integer" interface="config" list="0" index="32" size="2" />
+    </parameter>
+  </paramset>
+  <channels>
+    <channel index="0" type="MAINTENANCE" ui_flags="internal" class="maintenance" count="1">
+      <paramset type="MASTER" id="maint_ch_master" />
+      <paramset type="VALUES" id="maint_ch_values">
+        <parameter id="UNREACH" operations="read,event" ui_flags="service">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="UNREACH" />
+        </parameter>
+        <parameter id="STICKY_UNREACH" operations="read,write,event" ui_flags="service,sticky">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="STICKY_UNREACH" />
+        </parameter>
+        <parameter id="CONFIG_PENDING" operations="read,event" ui_flags="service">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="CONFIG_PENDING" />
+        </parameter>
+        <parameter id="LOWBAT" operations="read,event" ui_flags="service">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="LOWBAT" />
+        </parameter>
+        <parameter id="RSSI_DEVICE" operations="read,event">
+          <logical type="integer" />
+          <physical type="integer" interface="internal" value_id="RSSI_DEVICE" />
+        </parameter>
+        <parameter id="RSSI_PEER" operations="read,event">
+          <logical type="integer" />
+          <physical type="integer" interface="internal" value_id="RSSI_PEER" />
+        </parameter>
+        <parameter id="DEVICE_IN_BOOTLOADER" operations="read,event" ui_flags="service">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="DEVICE_IN_BOOTLOADER" />
+        </parameter>
+        <parameter id="UPDATE_PENDING" operations="read,event" ui_flags="service">
+          <logical type="boolean" />
+          <physical type="integer" interface="internal" value_id="UPDATE_PENDING" />
+        </parameter>
+      </paramset>
+    </channel>
+    <channel index="1" type="SOLAR" autoregister="true">
+      <link_roles>
+        <source name="SOLAR_TH" />
+      </link_roles>
+      <paramset type="MASTER" id="HB-SOLAR-Sensor_master" />
+      <paramset type="VALUES" id="HB-SOLAR-Sensor_values">
+           <parameter id="LUX" operations="read,event">
+          <logical type="float" min="0.00" max="500000.00" unit="Lux" />
+          <physical type="integer" interface="command" value_id="LUX" no_init="true">
+            <event frame="SOLAR_EVENT" />
+          </physical>
+          <conversion type="float_integer_scale" factor="100.0" />
+        </parameter>
+        <parameter id="OPERATING_VOLTAGE" operations="read,event">
+          <logical type="float" min="0.0" max="15" unit="V" />
+          <physical type="integer" interface="command" value_id="OPERATING_VOLTAGE">
+            <event frame="SOLAR_EVENT" />
+          </physical>
+          <conversion type="float_integer_scale" factor="100.0" />
+        </parameter>
+      </paramset>  
+      <paramset type="LINK" id="HB-SOLAR-Sensor_link"></paramset>
+    </channel>
+  </channels>
+  <frames>
+    <frame id="SOLAR_EVENT" direction="from_device" event="true" fixed_channel="1" type="0x71">
+      <parameter type="integer" index="11" size="4.0" param="LUX" />
+      <parameter type="integer" index="15" size="2.0" param="OPERATING_VOLTAGE" />
+    </frame>
+  </frames>
+  <paramset_defs></paramset_defs>
+</device>

@@ -1,0 +1,40 @@
+#include <Arduino.h>
+#include <HX711.h>
+#define LOADCELL_DOUT_PIN 7
+#define LOADCELL_SCK_PIN 6
+
+HX711 _hx711;
+
+void setup() {
+  Serial.begin(57600); 
+  delay(10);
+  _hx711.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+}
+
+void loop() {
+  _hx711.set_scale();
+  _hx711.tare();
+  float m = 0;
+  boolean f = 0;
+  while (f == 0) {
+    if (Serial.available() > 0) {
+      m = Serial.parseFloat();
+      if (m != 0) {
+        Serial.print("Known mass is: ");
+        Serial.println(m);
+        f = 1; 
+      }
+      else {
+        Serial.println("Invalid value");
+      }
+    }
+  }
+  float c = _hx711.get_units(10) / m;
+  Serial.println(c);
+  _hx711.set_scale(c);
+  while(true) {
+    Serial.println(_hx711.get_units(10));
+    delay(5);
+  }
+
+} 
